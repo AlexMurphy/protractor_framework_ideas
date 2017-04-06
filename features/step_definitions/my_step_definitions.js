@@ -1,3 +1,4 @@
+var angularPage = require('../pages/angularPage.js');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 
@@ -5,23 +6,29 @@ chai.use(chaiAsPromised);
 var expect = chai.expect;
 
 module.exports = function() {
-  this.Given(/^I go to "([^"]*)"$/, function(site) {
-    browser.get(site);
-  });
+	this.Given(/^I go to the site$/, function () {
+		angularPage.go();
+	});
 
-  this.When(/^I add "([^"]*)" in the task field$/, function(task) {
-    element(by.model('todoList.todoText')).sendKeys(task);
-  });
+	this.When(/^I add "([^"]*)" in the task field$/, function(task, callback) {
+		angularPage.addTask(task);
+		callback();
+	});
 
-  this.When(/^I click the add button$/, function() {
-    var el = element(by.css('[value="add"]'));
-    el.click();
-  });
+	this.When(/^I click the login button$/, function (callback) {
+		angularPage.submitLoginCredentials();
+		callback();
+	});
 
-  this.Then(/^I should see my new task in the list$/, function(callback) {
-    var todoList = element.all(by.repeater('todo in todoList.todos'));
-    expect(todoList.count()).to.eventually.equal(3);
-    expect(todoList.get(2).getText()).to.eventually.equal('Do not Be Awesome')
-      .and.notify(callback);
-  });
+
+	this.When(/^I click the add button$/, function() {
+		angularPage.submitTask();
+	});
+
+	this.Then(/^I should see my new task in the list$/, function(callback) {
+		var todoList = angularPage.angularHomepage.todoList;
+		expect(todoList.count()).to.eventually.equal(3);
+		expect(todoList.get(2).getText()).to.eventually.equal('Be Awesome')
+			.and.notify(callback);
+	});
 };
